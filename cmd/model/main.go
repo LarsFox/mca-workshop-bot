@@ -8,7 +8,7 @@ import (
 
 func main() {
 	log.Println("Listening at http://localhost:11112")
-	http.ListenAndServe(":11111", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	http.ListenAndServe(":11112", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := &request{}
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 			log.Println(err)
