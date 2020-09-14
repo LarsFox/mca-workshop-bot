@@ -55,14 +55,24 @@ func (c *Client) GetMessagesChan() (<-chan *Message, error) {
 }
 
 // SendMessage sends a message to chat.
-func (c *Client) SendMessage(chatID int64, text string) (*Response, error) {
+func (c *Client) SendMessage(chatID int64, text string, keyboard *ReplyKeyboardMarkup) (*Response, error) {
 	uri := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", c.token)
+
+	key := noKeyboard
+	if keyboard != nil {
+		data, err := json.Marshal(keyboard)
+		if err != nil {
+			return nil, err
+		}
+		key = string(data)
+	}
 
 	var b bytes.Buffer
 	if err := json.NewEncoder(&b).Encode(&sendMessage{
-		ChatID:    chatID,
-		ParseMode: "HTML",
-		Text:      text,
+		ChatID:      chatID,
+		ParseMode:   "HTML",
+		Text:        text,
+		ReplyMarkup: key,
 	}); err != nil {
 		return nil, err
 	}

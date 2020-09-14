@@ -4,15 +4,23 @@ import (
 	"os"
 
 	"github.com/LarsFox/mca-workshop-bot/bot"
+	"github.com/LarsFox/mca-workshop-bot/storage"
 	"github.com/LarsFox/mca-workshop-bot/tg"
 )
 
 func main() {
-	modelAddr := os.Getenv("MCA_WORKSHOP_MODEL_ADDR")
 	token := os.Getenv("MCA_WORKSHOP_TG_TOKEN")
 
 	tgClient := tg.NewClient(token)
+	storageClient, err := storage.NewClient("mca_workshop_bot.db")
+	if err != nil {
+		panic(err)
+	}
 
-	bot := bot.New(tgClient, modelAddr)
+	bot := bot.New(storageClient, tgClient, map[string]string{
+		bot.ModelBert:     os.Getenv("MCA_WORKSHOP_MODEL_BERT"),
+		bot.ModelFasttext: os.Getenv("MCA_WORKSHOP_MODEL_FASTTEXT"),
+		bot.ModelElmo:     os.Getenv("MCA_WORKSHOP_MODEL_ELMO"),
+	})
 	bot.Listen()
 }
