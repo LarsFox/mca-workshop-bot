@@ -12,7 +12,7 @@ type Client struct {
 }
 
 var (
-	bucketUsersMessages = []byte("users_messages")
+	bucketUsersModels = []byte("users_models")
 )
 
 // NewClient returns a new client creating a DB file if it does not exist.
@@ -23,7 +23,7 @@ func NewClient(dbPath string) (*Client, error) {
 	}
 
 	if err := db.Update(func(tx *bolt.Tx) error {
-		if _, err := tx.CreateBucketIfNotExists(bucketUsersMessages); err != nil {
+		if _, err := tx.CreateBucketIfNotExists(bucketUsersModels); err != nil {
 			return err
 		}
 		return nil
@@ -33,11 +33,11 @@ func NewClient(dbPath string) (*Client, error) {
 	return &Client{db: db}, nil
 }
 
-// GetUserMessage returns a user message or an empty string if the message is not found.
-func (c *Client) GetUserMessage(userID int64) (string, error) {
+// GetUserModel returns a user chosen model or an empty string if none was chosen.
+func (c *Client) GetUserModel(userID int64) (string, error) {
 	var msg string
 	if err := c.db.View(func(tx *bolt.Tx) error {
-		val := tx.Bucket(bucketUsersMessages).Get(uID(userID))
+		val := tx.Bucket(bucketUsersModels).Get(uID(userID))
 		if val == nil {
 			return nil
 		}
@@ -49,17 +49,10 @@ func (c *Client) GetUserMessage(userID int64) (string, error) {
 	return msg, nil
 }
 
-// SaveUserMessage saves a user message.
-func (c *Client) SaveUserMessage(userID int64, msg string) error {
+// SaveUserModel saves a user chosen model.
+func (c *Client) SaveUserModel(userID int64, model string) error {
 	return c.db.Update(func(tx *bolt.Tx) error {
-		return tx.Bucket(bucketUsersMessages).Put(uID(userID), []byte(msg))
-	})
-}
-
-// DeleteUserMessage deletes a user message.
-func (c *Client) DeleteUserMessage(userID int64) error {
-	return c.db.Update(func(tx *bolt.Tx) error {
-		return tx.Bucket(bucketUsersMessages).Delete(uID(userID))
+		return tx.Bucket(bucketUsersModels).Put(uID(userID), []byte(model))
 	})
 }
 

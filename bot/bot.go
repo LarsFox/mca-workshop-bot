@@ -12,15 +12,16 @@ import (
 )
 
 const (
-	errMessage    = "Произошла ошибка! Попробуйте повторить запрос чуть позже."
-	okMessage     = "<b>Результаты модели</b>\nАморальность: %.2f\nНаправленность: %.2f\nНецензурность: %.2f"
-	selectMessage = "В какую модель отправить реплику на анализ?"
-	modelAll      = "Во все сразу 📊"
+	errMessage      = "Произошла ошибка! Попробуйте повторить запрос чуть позже."
+	okMessage       = "<b>Результаты модели %s</b>\nАморальность: %.2f\nНаправленность: %.2f\nНецензурность: %.2f"
+	selectMessage   = "В какую модель отправлять реплики на анализ?"
+	selectedMessage = "Понял. Все последующие реплики буду отправлять в %s\n\nСмело отправляй реплики на оценку!"
+	modelAll        = "Во все сразу 📊"
 )
 
 var singleCommands = map[string]string{
-	"/start":   "Привет!\nНапиши мне любую реплику, а я оценю, насколько она попадает под критерии оскорбления",
-	"/help":    "Напиши мне любую реплику, а я оценю, насколько она попадает под критерии оскорбления",
+	"/start":   "Привет!\nНапиши мне любую реплику, а я оценю, насколько она попадает под критерии оскорбления.\n\nАнализ проходит по модели Берт. Если хочешь выбрать другую модель, отправь /select",
+	"/help":    "Напиши мне любую реплику, а я оценю, насколько она попадает под критерии оскорбления.\n\nПо умолчанию для оценки используется модель Берт — отправь /select, чтобы выбрать другую",
 	textCancel: "Окей.\nНапиши мне любую реплику, а я оценю, насколько она попадает под критерии оскорбления",
 }
 
@@ -97,60 +98,58 @@ func (bot *Bot) handleMsg(msg *tg.Message) {
 		return
 	}
 
+	if msg.Text == "/select" {
+		bot.sendMessage(msg.Chat.ID, selectMessage, &tg.ReplyKeyboardMarkup{
+			Keyboard: [][]*tg.KeyboardButton{
+				{{Text: textBert}},
+				{{Text: textFasttext}},
+				{{Text: textElmo}},
+				{{Text: textCancel}},
+			},
+			OneTimeKeyboard: true,
+		})
+		return
+	}
+
 	for model, text := range modelsTexts {
 		if msg.Text != text {
 			continue
 		}
 
-		addr, ok := bot.modelAddrs[model]
-		if !ok {
-			log.Println("no addr for model", model)
-			bot.sendErrorMessage(msg.Chat.ID)
-			return
-		}
-
-		text, err := bot.storageClient.GetUserMessage(msg.Chat.ID)
-		if err != nil {
+		if err := bot.storageClient.SaveUserModel(msg.Chat.ID, model); err != nil {
 			log.Println(err)
 			bot.sendErrorMessage(msg.Chat.ID)
 			return
 		}
 
-		a, err := bot.callModel(addr, text)
-		if err != nil {
-			log.Println(err)
-			bot.sendErrorMessage(msg.Chat.ID)
-			return
-		}
-
-		bot.sendMessage(msg.Chat.ID, fmt.Sprintf(okMessage, a.Immoral, a.Person, a.Obscene), nil)
+		bot.tgClient.SendMessage(msg.Chat.ID, fmt.Sprintf(selectedMessage, text), nil)
 		return
 	}
 
-	if msg.Text == modelAll {
-		if err := bot.storageClient.DeleteUserMessage(msg.Chat.ID); err != nil {
-			log.Println(err)
-			bot.sendErrorMessage(msg.Chat.ID)
-		}
-		// TODO!
+	model, err := bot.storageClient.GetUserModel(msg.Chat.ID)
+	if err != nil {
+		log.Println(err)
 		bot.sendErrorMessage(msg.Chat.ID)
 		return
 	}
 
-	if err := bot.storageClient.SaveUserMessage(msg.Chat.ID, msg.Text); err != nil {
+	if model == "" {
+		model = ModelBert
+	}
+
+	addr, ok := bot.modelAddrs[model]
+	if !ok {
+		log.Println("no addr for model", model)
 		bot.sendErrorMessage(msg.Chat.ID)
 		return
 	}
 
-	bot.sendMessage(msg.Chat.ID, selectMessage, &tg.ReplyKeyboardMarkup{
-		Keyboard: [][]*tg.KeyboardButton{
-			{{Text: textBert}},
-			{{Text: textFasttext}},
-			{{Text: textElmo}},
-			{{Text: textCancel}},
-		},
-		OneTimeKeyboard: true,
-	})
+	a, err := bot.callModel(addr, msg.Text)
+	if err != nil {
+		bot.sendErrorMessage(msg.Chat.ID)
+		return
+	}
+	bot.sendMessage(msg.Chat.ID, fmt.Sprintf(okMessage, modelsTexts[model], a.Immoral, a.Person, a.Obscene), nil)
 }
 
 func (bot *Bot) callModel(addr, text string) (*answer, error) {
