@@ -14,6 +14,9 @@ docker-build:
 docker-run:
 	@docker run -d --rm mca_workshop_bot
 
+lint:
+	@golangci-lint run
+
 run:
 	@go run cmd/bot/main.go
 

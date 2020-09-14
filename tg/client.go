@@ -25,19 +25,18 @@ func (c *Client) GetMessagesChan() (<-chan *Message, error) {
 
 	go func() {
 		for {
-			uri := fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates?timeout=100&offset=%d", c.token, c.lastUpdID+1)
-			res, err := http.Get(uri)
+			res, err := http.Get(fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates?timeout=100&offset=%d", c.token, c.lastUpdID+1)) // #nosec G107
 			if err != nil {
 				log.Println(err)
 				continue
 			}
 
 			resp := &Response{}
-			defer res.Body.Close()
 			if err := json.NewDecoder(res.Body).Decode(resp); err != nil {
 				log.Println(err)
 				continue
 			}
+			res.Body.Close()
 
 			var updates []*Update
 			if err := json.Unmarshal(resp.Result, &updates); err != nil {
