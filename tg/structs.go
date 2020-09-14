@@ -2,7 +2,7 @@ package tg
 
 import "encoding/json"
 
-// Response is a Telegram response
+// Response is a Telegram response.
 type Response struct {
 	Ok          bool            `json:"ok"`
 	Result      json.RawMessage `json:"result"`
@@ -16,14 +16,21 @@ type Update struct {
 	Message  *Message `json:"message"`
 }
 
-// Message is a Telegram message
+// Message is a Telegram message.
 type Message struct {
-	MessageID int64  `json:"message_id"`
-	Text      string `json:"text"`
-	Chat      *Chat  `json:"chat"`
+	MessageID int64    `json:"message_id"`
+	Text      string   `json:"text"`
+	Chat      *Chat    `json:"chat"`
+	Photo     []*Photo `json:"photo"`
 }
 
-// Chat is a Telegram chat
+// Photo is a Telegram photo.
+type Photo struct {
+	FileID       string `json:"file_id"`
+	FileUniqueID string `json:"file_unique_id"`
+}
+
+// Chat is a Telegram chat.
 type Chat struct {
 	ID        int64  `json:"id"`
 	Username  string `json:"username"`
@@ -38,7 +45,7 @@ type sendMessage struct {
 	ReplyMarkup string `json:"reply_markup"`
 }
 
-// ReplyKeyboardMarkup is a bot Keyboard
+// ReplyKeyboardMarkup is a bot Keyboard.
 type ReplyKeyboardMarkup struct {
 	Keyboard        [][]*KeyboardButton `json:"keyboard"`
 	ResizeKeyboard  bool                `json:"resize_keyboard"`   // optional

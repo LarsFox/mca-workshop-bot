@@ -126,6 +126,11 @@ func (bot *Bot) handleMsg(msg *tg.Message) {
 		return
 	}
 
+	log.Println("message from:", msg.Chat.ID, msg.Chat.Username, msg.Text)
+	for _, p := range msg.Photo {
+		log.Println("photo from:", msg.Chat.ID, msg.Chat.Username, p.FileID, p.FileUniqueID)
+	}
+
 	model, err := bot.storageClient.GetUserModel(msg.Chat.ID)
 	if err != nil {
 		log.Println(err)
