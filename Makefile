@@ -12,7 +12,7 @@ docker-build:
 	@docker build -t mca_workshop_bot .
 
 docker-run:
-	@docker run -d --rm mca_workshop_bot
+	@docker-compose up -d
 
 lint:
 	@golangci-lint run

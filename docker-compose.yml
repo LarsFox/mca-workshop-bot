@@ -1,0 +1,18 @@
+version: "3.7"
+services:
+  elmo:
+    image: registry.gitlab.com/rostepifanov/mca-workshop:model-wrapper-elmo
+    container_name: mca_workshop_elmo
+    restart: always
+    environment:
+      - MCA_WORKSHOP_LISTEN_HOST=0.0.0.0
+      - MCA_WORKSHOP_MODEL_PATH=/srv/models/elmomodel.pkl
+      - LC_ALL=en_US.UTF-8
+
+  gateway:
+    image: mca_workshop_bot
+    container_name: mca_workshop_gateway
+    restart: always
+    env_file: .env
+    links:
+      - "elmo:elmo"

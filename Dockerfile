@@ -6,10 +6,10 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o mca_workshop_bot cmd/bot/main.go
 
 # Run.
-FROM alpine:3.12.0
+FROM alpine:3.12.0 AS launcher
 
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
-COPY --from=0 /bot/mca_workshop_bot /bot/.env /bot/run.sh ./
+COPY --from=builder /bot/mca_workshop_bot .
 
-ENTRYPOINT sh /root/run.sh
+CMD /root/mca_workshop_bot
