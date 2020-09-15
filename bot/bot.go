@@ -13,7 +13,7 @@ import (
 
 const (
 	errMessage      = "Произошла ошибка! Попробуйте повторить запрос чуть позже."
-	okMessage       = "<b>Результаты модели %s</b>\nАморальность: %.2f\nНаправленность: %.2f\nНецензурность: %.2f"
+	okMessage       = "<b>Результаты модели %s</b>\nАморальность: %.f%%\nНаправленность: %.f%%\nНецензурность: %.f%%"
 	selectMessage   = "В какую модель отправлять реплики на анализ?"
 	selectedMessage = "Понял. Все последующие реплики буду отправлять в %s\n\nСмело отправляй реплики на оценку!"
 	modelAll        = "Во все сразу 📊"
@@ -154,7 +154,7 @@ func (bot *Bot) handleMsg(msg *tg.Message) {
 		bot.sendErrorMessage(msg.Chat.ID)
 		return
 	}
-	bot.sendMessage(msg.Chat.ID, fmt.Sprintf(okMessage, modelsTexts[model], a.Immoral, a.Person, a.Obscene), nil)
+	bot.sendMessage(msg.Chat.ID, fmt.Sprintf(okMessage, modelsTexts[model], a.Immoral*100, a.Person*100, a.Obscene*100), nil) // nolint mnd
 }
 
 func (bot *Bot) callModel(addr, text string) (*answer, error) {
