@@ -18,9 +18,8 @@ func main() {
 	}
 
 	bot := bot.New(storageClient, tgClient, map[string]string{
-		bot.ModelBert:     os.Getenv("MCA_WORKSHOP_MODEL_BERT"),
-		bot.ModelFasttext: os.Getenv("MCA_WORKSHOP_MODEL_FASTTEXT"),
-		bot.ModelElmo:     os.Getenv("MCA_WORKSHOP_MODEL_ELMO"),
+		bot.ModelBert: os.Getenv("MCA_WORKSHOP_MODEL_BERT"),
+		bot.ModelElmo: os.Getenv("MCA_WORKSHOP_MODEL_ELMO"),
 	})
 	bot.Listen()
 }

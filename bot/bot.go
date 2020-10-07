@@ -27,22 +27,19 @@ var singleCommands = map[string]string{
 
 // Available models.
 const (
-	ModelBert     = "bert"
-	ModelElmo     = "elmo"
-	ModelFasttext = "fasttext"
+	ModelBert = "bert"
+	ModelElmo = "elmo"
 )
 
 const (
-	textBert     = "Берт 🅱️"
-	textElmo     = "Элмо 🍪"
-	textFasttext = "Фасттекст 🔤"
-	textCancel   = "Отмена 🔙"
+	textBert   = "Берт 🅱️"
+	textElmo   = "Элмо 🍪"
+	textCancel = "Отмена 🔙"
 )
 
 var modelsTexts = map[string]string{
-	ModelBert:     textBert,
-	ModelElmo:     textElmo,
-	ModelFasttext: textFasttext,
+	ModelBert: textBert,
+	ModelElmo: textElmo,
 }
 
 type request struct {
@@ -102,7 +99,6 @@ func (bot *Bot) handleMsg(msg *tg.Message) {
 		bot.sendMessage(msg.Chat.ID, selectMessage, &tg.ReplyKeyboardMarkup{
 			Keyboard: [][]*tg.KeyboardButton{
 				{{Text: textBert}},
-				{{Text: textFasttext}},
 				{{Text: textElmo}},
 				{{Text: textCancel}},
 			},
